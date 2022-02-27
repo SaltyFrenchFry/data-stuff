@@ -89,18 +89,17 @@ print(b)
     
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(dataset.x[:,0].numpy(), dataset.x[:,1].numpy(), dataset.y.numpy())
-
-x1 = dataset.x[:,0].view(-1,1).numpy()
-x2 = dataset.x[:,1].view(-1,1).numpy()
-
-yhat = np.zeros((60, 60))
-for i in range(len(dataset)):
-    for j in range(len(dataset)):
-        yhat[i][j] = torch.tensor([dataset.x[i][0],dataset.x[j][1]]).dot(w[0]).item()
-#print(yhat)
 
 
 for i in range(len(dataset)):
-    ax.scatter(x1[i], x2[i], yhat[i])
+    ax.scatter(dataset.x[i,0], dataset.x[i,1], dataset.y[i])
+
+    
+xx, yy = np.meshgrid(np.arange(-3,3,0.1), np.arange(-3,3,0.1))
+z = xx*(w[0][0].item()) + yy*(w[0][1].item()) + b.item()
+
+ax.plot_surface(xx, yy, z)
+
 plt.show()
+
+# yhat = w1x1 + w2x2 +... wnxn + b
