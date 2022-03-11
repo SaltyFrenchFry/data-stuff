@@ -50,8 +50,8 @@ trainingData = Data()
 
 trainloader = DataLoader(dataset=trainingData, batch_size=5)
 
-w = torch.tensor(-15.0, requires_grad = True)
-b = torch.tensor(-10.0, requires_grad = True)
+#w = torch.tensor(-15.0, requires_grad = True)
+#b = torch.tensor(-10.0, requires_grad = True)
 
 epochs = 10
 learningRates = [0.0001, 0.001, 0.01, 0.1, 1]

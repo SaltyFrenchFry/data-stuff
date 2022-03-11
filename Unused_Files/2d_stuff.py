@@ -24,19 +24,13 @@ class LR(nn.Module):
 
 class Data2D(Dataset):
     def __init__(self):
-        self.x = torch.zeros(60, 60, 2)
-        coor = torch.arange(-3, 3, 0.1)
-        for i in range(coor.shape[0]):
-            for j in range(coor.shape[0]):
-                self.x[i,j,0] = coor[i].item()
-                self.x[i,j,1] = coor[j].item()
-        self.w = torch.tensor([[3.0],[2.0]])
-        self.b = 0
-        self.f = torch.zeros(60, 60)
-        for i in range(self.f.shape[0]):
-            for j in range(self.f.shape[0]):
-                self.f[i,j] = torch.dot(self.x[i,j], self.w.view(1,-1)[0])+self.b
-        self.y = self.f + 0.5*torch.randn((self.x.shape[0],1))
+        self.x = torch.zeros(60, 2)
+        self.x[:,0] = torch.arange(-3, 3, 0.1)
+        self.x[:,1] = torch.arange(-3, 3, 0.1)
+        self.w = torch.tensor([[2.0],[3.0]])
+        self.b = 1
+        self.f = torch.mm(self.x, self.w)+self.b
+        self.y = self.f + 0.1*torch.randn((self.x.shape[0],1))
         self.len = self.x.shape[0]
     
     def __getitem__(self, index):
@@ -49,22 +43,22 @@ dataset = Data2D()
 
 criterion = nn.MSELoss()
 
-trainloader = DataLoader(dataset = dataset, batch_size = 5)
+trainloader = DataLoader(dataset = dataset, batch_size = 2)
 
 model = LR(input_size = 2, output_size = 1)
 
 optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
-min_loss = 1000000000
+min_loss = 1000
 
 COST = []
-for epoch in range(10):
+for epoch in range(1000):
     
     total = 0
     
     for x,y in trainloader:
         yhat = model(x)
-        loss = criterion(yhat.view(trainloader.batch_size,dataset.len), y)
+        loss = criterion(yhat, y)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -92,18 +86,14 @@ for param in model_best.parameters():
 
 print(w)
 print(b)
-print(COST)
     
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 
-x1 = dataset.x[:,:,0].view(-1,1).numpy()
-x2 = dataset.x[:,:,1].view(-1,1).numpy()
-y = dataset.y.view(-1,1).numpy()
+for i in range(len(dataset)):
+    ax.scatter(dataset.x[i,0], dataset.x[i,1], dataset.y[i])
 
-for i in range(len(dataset)**2):
-    ax.scatter(x1[i], x2[i], y[i])
     
 xx, yy = np.meshgrid(np.arange(-3,3,0.1), np.arange(-3,3,0.1))
 z = xx*(w[0][0].item()) + yy*(w[0][1].item()) + b.item()
@@ -111,3 +101,5 @@ z = xx*(w[0][0].item()) + yy*(w[0][1].item()) + b.item()
 ax.plot_surface(xx, yy, z)
 
 plt.show()
+
+# yhat = w1x1 + w2x2 +... wnxn + b
